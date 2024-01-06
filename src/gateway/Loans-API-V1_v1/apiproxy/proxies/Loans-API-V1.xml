@@ -1,0 +1,764 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+<ProxyEndpoint name="Loans-API-V1ProxyEndpoint">
+   <Description>Loans-API-V1</Description>
+   <FaultRules>
+      <FaultRule name="SecurityFaultHandling">
+         <Step>
+            <Name>SF-SecurityFaultCallout</Name>
+         </Step>
+         <Condition>((oauthV2.VerifyAccessToken.failed equals true) or ((oauthV2.VerifyAPIKey.failed equals true) or (BasicAuthentication.DecodeBasicAuthentication.failed equals true) or (acl.AccessControl.failed equals true) or (oauthV2.failed equals true) or (authFlag equals false) or (isValidToken equals false)))</Condition>
+      </FaultRule>
+      <FaultRule name="ThreatFaultHandling">
+         <Step>
+            <Name>SF-ThreatFault</Name>
+         </Step>
+         <Condition>((jsonattack.cf-JSONThreatProtection.DoSAEvaluation.failed equals true) or (threatProtectionEvaluationStatus == "failed"))</Condition>
+      </FaultRule>
+   </FaultRules>
+   <DefaultFaultRule name="All">
+      <AlwaysEnforce>true</AlwaysEnforce>
+      <Step>
+         <Name>SF-DefaultFaultCallout</Name>
+      </Step>
+      <AlwaysEnforce>true</AlwaysEnforce>
+   </DefaultFaultRule>
+   <PreFlow name="PreFlow">
+      <Request>
+         <Step>
+            <Name>cf-set-log-variables</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>cf-Generate-Message-Correlation-ID</Name>
+         </Step>
+         <Step>
+            <Name>SF-Proxy-Current-Flow-Name</Name>
+         </Step>
+         <Step>
+            <Name>SF-Log-Preflow-Request</Name>
+         </Step>
+         <Step>
+            <Condition>(request.header.Authorization equals null) and (log.proxyVerb != "OPTIONS")</Condition>
+            <Name>cf-data-validation-Authorization</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS") and (request.header.Content-Length != 0)</Condition>
+            <Name>SF-JSONThreatValidation</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>SF-ThreatProtection</Name>
+         </Step>
+         <Step>
+            <Condition>(log.proxyVerb != "OPTIONS")</Condition>
+            <Name>SF-Validate-Access-Token</Name>
+         </Step>
+      </Request>
+      <Response>
+      </Response>
+   </PreFlow>
+   <Flows>
+      <Flow name="WrongAccept">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Fault-Unsupported-AcceptType</Name>
+            </Step>
+         </Request>
+         <Response/>
+         <Condition>(log.proxyVerb != "OPTIONS") and (!(log.Accept JavaRegex "(text\/xml)(;.*)|(.*;)(text\/xml)(;.*)|text\/xml|(.*;)(text\/xml)|(application\/xml)(;.*)|(.*;)(application\/xml)(;.*)|application\/xml|(.*;)(application\/xml)|(application\/json)(;.*)|(.*;)(application\/json)(;.*)|application\/json|(.*;)(application\/json)"))</Condition>
+      </Flow>
+      <Flow name="WrongContentType">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Fault-Unsupported-ContentType</Name>
+            </Step>
+         </Request>
+         <Response/>
+         <Condition>(log.proxyVerb != "OPTIONS") and ((!(request.content = "")) and (!(request.content is null)) and !(log.Content-Type JavaRegex "(text\/xml)(;.*)|(.*;)(text\/xml)(;.*)|text\/xml|(.*;)(text\/xml)|(application\/xml)(;.*)|(.*;)(application\/xml)(;.*)|application\/xml|(.*;)(application\/xml)|(application\/json)(;.*)|(.*;)(application\/json)(;.*)|application\/json|(.*;)(application\/json)"))</Condition>
+      </Flow>
+      <Flow name="POSTGenerateCreditScoreId">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTGenerateCreditScoreId</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/credolab/score/reference-id&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanDashboard">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanDashboard</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/loan-dashboard&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanFullRepaymentInq">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanFullRepaymentInq</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/loanFullRepaymentInq&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTLoanSettlement">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTLoanSettlement</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/loanSettlement&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateloanSignedDocList">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateloanSignedDocList</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/signed-documents&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanTransaction">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanTransaction</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/loantransactions&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateBasicDetails">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateBasicDetails</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/basicdetails&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateCurrentAddress">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateCurrentAddress</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/current-address&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHUpdateTenureSalaryDays">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHUpdateTenureSalaryDays</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/tenur&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTTenureApprovedLoanAmt">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTTenureApprovedLoanAmt</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/tenur&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHUpdateAppRating">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHUpdateAppRating</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/app-rating&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateTnC">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateTnC</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/tnc&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateDocuments">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateDocuments</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/documents&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateBanks">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateBanks</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/banks&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateTin">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateTin</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/tin&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateCaptial">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateCaptial</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/capital&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTCreateReferals">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTCreateReferals</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/referal-details&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateDependents">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateDependents</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/dependents&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateMaritalStatus">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateMaritalStatus</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/marital-status&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateIndustries">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateIndustries</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/industries&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHDocValidation">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHDocValidation</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/docvalidation&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHSkyUpgrade">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHSkyUpgrade</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/skycupgrade&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="GETApplicationLov">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETApplicationLov</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/lov/{applicationlov}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTInsertLoanData">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTInsertLoanData</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanProductsList">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanProductsList</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/tenures&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHCredolabscore">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHCredolabscore</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/credolab/datainsight/{refId}&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="GETCredolabscore">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETCredolabscore</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/credolab/score/{refId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanSignedDocList">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanSignedDocList</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/loandocuments/{loanDigitalId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="GETLoanOffers">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GETLoanOffers</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/offers/{loanDigitalId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="GetLoan">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-GetLoan</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/{loanDigitalId}&quot;) and (request.verb= &quot;GET&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateMerchant">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateMerchant</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/merchant&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateReceiptDetails">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateReceiptDetails</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/receipt&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdatePurpleKey">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdatePurpleKey</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/purplekey&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="PATCHRelinkCard">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-PATCHRelinkCard</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/cards&quot;) and (request.verb= &quot;PATCH&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdateCardDetails">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdateCardDetails</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/cards&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <Flow name="POSTUpdatePurpose">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Condition>(request.header.Content-Length equals 0) and (request.verb!= "GET") and (request.verb!= "DELETE")</Condition>
+               <Name>cf-data-validation-payload</Name>
+            </Step>
+            <Step>
+               <Name>cf-Assign-Routing-Variables-POSTUpdatePurpose</Name>
+            </Step>
+         </Request>
+         <Response>
+         </Response>
+         <Condition>(proxy.pathsuffix MatchesPath &quot;/{loan-product}/purpose&quot;) and (request.verb= &quot;POST&quot;)</Condition>
+      </Flow>
+      <!-- CORS Preflight flow-->
+      <Flow name="CORS">
+         <Description/>
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-getCORSDomainList</Name>
+            </Step>
+         </Request>
+         <Response>
+            <Step>
+               <Name>cf-CORSValidation</Name>
+            </Step>
+         </Response>
+         <Condition>(log.proxyVerb == "OPTIONS") and (log.origin != null)</Condition>
+      </Flow>
+      <Flow name="unknown-resource">
+         <Request>
+            <Step>
+               <Name>SF-Proxy-Current-Flow-Name</Name>
+            </Step>
+            <Step>
+               <Name>cf-Unknown-Resource</Name>
+            </Step>
+         </Request>
+         <Response/>
+      </Flow>
+   </Flows>
+   <PostFlow name="PostFlow">
+      <Request></Request>
+      <Response>
+         <Step>
+		      <Condition>(request.verb != "OPTIONS")</Condition>
+            <Name>cf-getCORSDomainList</Name>
+         </Step>
+         <Step>
+			   <Condition>(request.verb != "OPTIONS")</Condition>
+            <Name>cf-CORSValidation</Name>
+         </Step>
+         <Step>
+            <Name>SF-Log-Collector</Name>
+         </Step>
+         <Step>
+            <Name>cf-Custom-Statistics-Collector</Name>
+         </Step>
+      </Response>
+   </PostFlow>
+   <PostClientFlow>
+        <Request/>
+        <Response>
+        </Response>
+    </PostClientFlow>
+   <HTTPProxyConnection>
+      <BasePath>/v1/loansnew</BasePath>
+      <VirtualHost>tonikvirtualhosthttps</VirtualHost>
+   </HTTPProxyConnection>
+   <RouteRule name="NoRoute">
+        <Condition>(request.verb == "OPTIONS")</Condition>
+   </RouteRule>
+   <RouteRule name="Loans-API-V1">
+      <Condition>(target.route.service = &quot;Loans-API-V1&quot;)</Condition>
+      <TargetEndpoint>Loans-API-V1</TargetEndpoint>
+   </RouteRule>
+</ProxyEndpoint>

@@ -1,0 +1,297 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<TargetEndpoint name="Loans-API-V1">
+    <Description>Loans-API-V1</Description>
+	<FaultRules>
+	</FaultRules>
+	<DefaultFaultRule>
+            <Step>
+                <Name>SF-PostflowResponseTargetLogAggregator</Name>
+            </Step>
+    	<AlwaysEnforce>true</AlwaysEnforce>
+	</DefaultFaultRule>
+	<PreFlow name="PreFlow">
+        <Request>
+            <Step>
+                <Name>SF-PreflowRequestTargetLogAggregator</Name>
+            </Step>
+            <Step>
+                <Name>cf-Remove-Proxy-Auth-Header</Name>
+            </Step>
+        </Request>
+        <Response/>
+    </PreFlow>
+	<Flows>
+        <Flow name="POSTGenerateCreditScoreId">
+        	<Condition>(targetOperation = &quot;POSTGenerateCreditScoreId&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanDashboard">
+        	<Condition>(targetOperation = &quot;GETLoanDashboard&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanFullRepaymentInq">
+        	<Condition>(targetOperation = &quot;GETLoanFullRepaymentInq&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTLoanSettlement">
+        	<Condition>(targetOperation = &quot;POSTLoanSettlement&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateloanSignedDocList">
+        	<Condition>(targetOperation = &quot;POSTUpdateloanSignedDocList&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanTransaction">
+        	<Condition>(targetOperation = &quot;GETLoanTransaction&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateBasicDetails">
+        	<Condition>(targetOperation = &quot;POSTUpdateBasicDetails&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateCurrentAddress">
+        	<Condition>(targetOperation = &quot;POSTUpdateCurrentAddress&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTTenureApprovedLoanAmt">
+        	<Condition>(targetOperation = &quot;POSTTenureApprovedLoanAmt&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHUpdateTenureSalaryDays">
+        	<Condition>(targetOperation = &quot;PATCHUpdateTenureSalaryDays&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHUpdateAppRating">
+        	<Condition>(targetOperation = &quot;PATCHUpdateAppRating&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateTnC">
+        	<Condition>(targetOperation = &quot;POSTUpdateTnC&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateDocuments">
+        	<Condition>(targetOperation = &quot;POSTUpdateDocuments&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateBanks">
+        	<Condition>(targetOperation = &quot;POSTUpdateBanks&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateTin">
+        	<Condition>(targetOperation = &quot;POSTUpdateTin&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateCaptial">
+        	<Condition>(targetOperation = &quot;POSTUpdateCaptial&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTCreateReferals">
+        	<Condition>(targetOperation = &quot;POSTCreateReferals&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateDependents">
+        	<Condition>(targetOperation = &quot;POSTUpdateDependents&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateMaritalStatus">
+        	<Condition>(targetOperation = &quot;POSTUpdateMaritalStatus&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateIndustries">
+        	<Condition>(targetOperation = &quot;POSTUpdateIndustries&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHDocValidation">
+        	<Condition>(targetOperation = &quot;PATCHDocValidation&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHSkyUpgrade">
+        	<Condition>(targetOperation = &quot;PATCHSkyUpgrade&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETApplicationLov">
+        	<Condition>(targetOperation = &quot;GETApplicationLov&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTInsertLoanData">
+        	<Condition>(targetOperation = &quot;POSTInsertLoanData&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanProductsList">
+        	<Condition>(targetOperation = &quot;GETLoanProductsList&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHCredolabscore">
+        	<Condition>(targetOperation = &quot;PATCHCredolabscore&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETCredolabscore">
+        	<Condition>(targetOperation = &quot;GETCredolabscore&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanSignedDocList">
+        	<Condition>(targetOperation = &quot;GETLoanSignedDocList&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GETLoanOffers">
+        	<Condition>(targetOperation = &quot;GETLoanOffers&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="GetLoan">
+        	<Condition>(targetOperation = &quot;GetLoan&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateMerchant">
+        	<Condition>(targetOperation = &quot;POSTUpdateMerchant&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateReceiptDetails">
+        	<Condition>(targetOperation = &quot;POSTUpdateReceiptDetails&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdatePurpleKey">
+        	<Condition>(targetOperation = &quot;POSTUpdatePurpleKey&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdateCardDetails">
+        	<Condition>(targetOperation = &quot;POSTUpdateCardDetails&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="PATCHRelinkCard">
+        	<Condition>(targetOperation = &quot;PATCHRelinkCard&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+        <Flow name="POSTUpdatePurpose">
+        	<Condition>(targetOperation = &quot;POSTUpdatePurpose&quot;)</Condition>
+			<Request>
+			</Request>   
+			<Response>
+			</Response>
+        </Flow>
+	</Flows>
+    <PostFlow name="PostFlow">
+        <Request>
+            <Step>
+                <Name>SF-PostflowRequestTargetLogAggregator</Name>
+            </Step>
+        </Request>
+        <Response>
+            <Step>
+                <Name>SF-PostflowResponseTargetLogAggregator</Name>
+            </Step>
+        </Response>
+    </PostFlow>
+    <HTTPTargetConnection>
+    	<LoadBalancer>
+            <Server name="Tonik-Loans-API-V1">
+                <IsEnabled>true</IsEnabled>
+            </Server>
+        </LoadBalancer>
+        <Path>{targetBasePath}</Path>
+    </HTTPTargetConnection>
+</TargetEndpoint>
